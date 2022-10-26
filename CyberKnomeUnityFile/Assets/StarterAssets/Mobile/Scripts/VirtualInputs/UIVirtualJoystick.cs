@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class UIVirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
@@ -8,6 +9,7 @@ public class UIVirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandle
     public class Event : UnityEvent<Vector2> { }
     
     [Header("Rect References")]
+    public RectTransform thisRect;
     public RectTransform containerRect;
     public RectTransform handleRect;
 
@@ -20,9 +22,21 @@ public class UIVirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandle
     [Header("Output")]
     public Event joystickOutputEvent;
 
+    [Header("Graphics")]
+    public bool useHideOption;
+    public Image[] joystickVisuals;
+
+	[Header("Settings")]
+    public bool isLeftJoystick;
+    
+    //for dynamic movement
+    bool isDragging;
+    Vector2 originalPos;
+
     void Start()
     {
         SetupHandle();
+        originalPos = containerRect.anchoredPosition;
     }
 
     private void SetupHandle()
@@ -31,15 +45,47 @@ public class UIVirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandle
         {
             UpdateHandleRectPosition(Vector2.zero);
         }
+
+        if (useHideOption)
+        {
+            foreach (Image img in joystickVisuals)
+            {
+                img.color = Color.clear;
+            }
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         OnDrag(eventData);
+
+        if (useHideOption)
+        {
+            foreach (Image img in joystickVisuals)
+            {
+                img.color = Color.white;
+            }
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (!isDragging && isLeftJoystick)
+        {
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(thisRect, eventData.position, eventData.pressEventCamera, out Vector2 localCursor))
+            {
+                isDragging = true;
+                containerRect.anchoredPosition = localCursor;
+            }
+        } 
+        else
+	    {
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(thisRect, eventData.position, eventData.pressEventCamera, out Vector2 localCursor))
+            {
+                isDragging = true;
+                containerRect.anchoredPosition = Vector2.Lerp(containerRect.anchoredPosition, localCursor, Time.deltaTime * (isLeftJoystick ? Settings.LJSensitivity : Settings.RJSensitivity));
+            }
+        }
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(containerRect, eventData.position, eventData.pressEventCamera, out Vector2 position);
         
@@ -51,7 +97,7 @@ public class UIVirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandle
 
         OutputPointerEventValue(outputPosition * magnitudeMultiplier);
 
-        if(handleRect)
+        if (handleRect)
         {
             UpdateHandleRectPosition(clampedPosition * joystickRange);
         }
@@ -60,12 +106,24 @@ public class UIVirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandle
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        isDragging = false;
+
         OutputPointerEventValue(Vector2.zero);
 
         if(handleRect)
         {
              UpdateHandleRectPosition(Vector2.zero);
         }
+
+        if (useHideOption)
+        {
+            foreach (Image img in joystickVisuals)
+            {
+                img.color = Color.clear;
+            }
+        }
+
+        containerRect.anchoredPosition = originalPos;
     }
 
     private void OutputPointerEventValue(Vector2 pointerPosition)
@@ -109,5 +167,4 @@ public class UIVirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandle
     {
         return -value;
     }
-    
 }
