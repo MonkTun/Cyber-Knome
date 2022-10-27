@@ -11,7 +11,8 @@ public class UICommunicator : MonoBehaviour
 	[Header("Interact")]
 	[SerializeField] UIAccessor[] interactUI;
 	[SerializeField] Sprite talkSprite, grabSprite, openSprite;
-	
+	[Header("WeaponInventory")]
+	[SerializeField] UIAccessor[] hotbarButtons;
 
 	float interactHighlightTime;
 	bool interactActive;
@@ -47,6 +48,8 @@ public class UICommunicator : MonoBehaviour
 			PCPanel.SetActive(true);
 		}
 	}
+
+	#region Interact
 
 	public void InteractNearby(InteractableData data)
 	{
@@ -104,4 +107,30 @@ public class UICommunicator : MonoBehaviour
 		}
 		interactActive = false;
 	}
+
+	#endregion
+
+	#region weapon inventory
+
+	public void WeaponInventoryUpdate(List<int> _weaponInventory, int _currentWeaponIndex)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			hotbarButtons[i].SetHighlight(i == _currentWeaponIndex);
+
+			if (i < _weaponInventory.Count)
+			{
+				hotbarButtons[i].img.sprite = ItemList.Instance.UltimateWeaponList[_weaponInventory[i]].sprite;
+				hotbarButtons[i].img.color = Color.white;
+
+			} else
+			{
+				hotbarButtons[i].img.sprite = null;
+				hotbarButtons[i].img.color = Color.clear;
+			}
+
+		}
+	}
+
+	#endregion
 }

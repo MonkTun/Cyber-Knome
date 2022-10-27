@@ -32,5 +32,19 @@ public class ItemList : MonoBehaviour
 			return ultimateItemList;
 		}
 	}
+
+	public static ItemList Instance;
+
+	private void Awake()
+	{
+		if (Instance == null)
+		{
+			Instance = this;
+		} else
+		{
+			Destroy(gameObject);
+			return;
+		}
+	}
 }
 

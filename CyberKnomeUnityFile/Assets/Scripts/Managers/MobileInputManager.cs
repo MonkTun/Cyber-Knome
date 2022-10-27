@@ -2,31 +2,38 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputManager : MonoBehaviour
+public class MobileInputManager : MonoBehaviour
 {
 	public void OnInputMovement(Vector2 input) //TODO: put all input here also option for pc
 	{
-		PlayerInput.SetPlayerInputMovement(input);
+		MobilePlayerInput.SetPlayerInputMovement(input);
 	}
 
 	public void OnInputAim(Vector2 input)
 	{
-		PlayerInput.SetPlayerInputAim(input);
+		MobilePlayerInput.SetPlayerInputAim(input);
 	}
 
 	public void OnInteract()
 	{
 		//print("onInteract");
-		PlayerInput.SetInteractInput(true);
+		MobilePlayerInput.SetInteractInput(true);
+	}
+
+	public void OnWeaponInventorySelect(int index)
+	{
+		MobilePlayerInput.SetWeaponIventorySelected(index);
 	}
 }
 
-public static class PlayerInput
+public static class MobilePlayerInput
 {
 	public static Vector2 MovementInput { get; private set; }
 	public static Vector2 AimInput { get; private set; }
 
 	public static bool InteractInput { get; private set; }
+
+	public static int WeaponIventorySelected { get; private set; }
 
 	public static void SetPlayerInputMovement(Vector2 input)
 	{
@@ -41,5 +48,10 @@ public static class PlayerInput
 	public static void SetInteractInput(bool input)
 	{
 		InteractInput = input;
+	}
+
+	public static void SetWeaponIventorySelected(int input)
+	{
+		WeaponIventorySelected = input;
 	}
 } 

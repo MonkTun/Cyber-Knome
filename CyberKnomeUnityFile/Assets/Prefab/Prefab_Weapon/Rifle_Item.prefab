@@ -102,7 +102,7 @@ MonoBehaviour:
   interactData:
     interactType: 0
     interactable: {fileID: 588282660325621442}
-  returnObject: {fileID: 6952783765957363250, guid: a7a14156fda74314e97f974ec8a1b4ad, type: 3}
+  returnItemCode: 2
   destroyAfterInteract: 1
 --- !u!61 &588282660325621455
 BoxCollider2D:

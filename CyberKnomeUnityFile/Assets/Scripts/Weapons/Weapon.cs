@@ -7,8 +7,7 @@ public class Weapon : MonoBehaviour
 	[SerializeField] GameObject interactWeaponObj;
 	[SerializeField] Animator AN;
 	float lastFireTime;
-	[Header("Weapon Item Code")]
-	public int itemCode;
+
 	[Header("Weapon Trait")]
 	public WeaponType weaponType;
 	[SerializeField] float cooltime;

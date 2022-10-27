@@ -5,7 +5,7 @@ using UnityEngine;
 public class Interactable : MonoBehaviour
 {
 	[SerializeField] InteractableData interactData;
-	[SerializeField] GameObject returnObject;
+	[SerializeField] int returnItemCode;
 	[SerializeField] bool destroyAfterInteract;
 
 	public InteractableData InteractCheck()
@@ -13,10 +13,10 @@ public class Interactable : MonoBehaviour
 		return interactData;
 	}
 
-    public GameObject Interact()
+    public int Interact()
 	{
 		if (destroyAfterInteract) Destroy(gameObject);
-		return returnObject;
+		return returnItemCode;
 	}
 }
 

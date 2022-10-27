@@ -8,4 +8,10 @@ public class UIAccessor : MonoBehaviour
 {
     public Image img;
     public TMP_Text txt;
+    public GameObject highlight;
+
+    public void SetHighlight(bool highlightThis)
+	{
+        highlight.SetActive(highlightThis);
+	}
 }

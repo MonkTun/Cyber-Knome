@@ -164,7 +164,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactWeaponObj: {fileID: 588282660325621440, guid: 7fba3128bb4cae543ab9f85b75193fed, type: 3}
   AN: {fileID: 3087126698647028971}
-  itemCode: 2
+  weaponItemCode: 2
   weaponType: 1
   cooltime: 0.5
   damage: 10

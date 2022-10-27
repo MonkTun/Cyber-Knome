@@ -12,6 +12,7 @@ public class SettingsManager : MonoBehaviour
 	[SerializeField] Toggle advanced_isMobileInputToggle;
 	[SerializeField] Slider LJSensitivitySlider;
 	[SerializeField] Slider RJSensitivitySlider;
+	[SerializeField] Toggle inverseMouseWheelToggle;
 
 	public static SettingsManager Instance;
 
@@ -19,6 +20,7 @@ public class SettingsManager : MonoBehaviour
 	int default_fpsIndex = 1;
 	float default_leftJoystickSensitivity = 1;
 	float default_rightJoystickSensitivity = 1;
+	bool default_inverseMouseWheel = false;
 
 	void Awake()
     {
@@ -51,6 +53,10 @@ public class SettingsManager : MonoBehaviour
 		//print("RJSensitovoty is " + RJSensitivity);
 		SetVirtualJoystickSensitivityRight(RJSensitivity);
 		RJSensitivitySlider.value = RJSensitivity;
+
+		bool isInverseMouseWheel = ES3.Load("settings_inverseMouseWheel", default_inverseMouseWheel);
+		SetInverseMouseWheel(isMobile);
+		inverseMouseWheelToggle.isOn = isInverseMouseWheel;
 	}
 
 	#region set and saves
@@ -79,7 +85,12 @@ public class SettingsManager : MonoBehaviour
 	{
         ES3.Save("settings_isMobile", value);
 		Settings.SetIsMobile(value);
-		//TODO;
+	}
+
+	public void SetInverseMouseWheel(bool value)
+	{
+		ES3.Save("settings_inverseMouseWheel", value);
+		Settings.SetInverseMouseWheel(value); //TODO change 
 	}
 
     public void SetVirtualJoystickSensitivityLeft(float value)
@@ -102,6 +113,7 @@ public static class Settings
 	public static bool isMobile { get; private set; }
 	public static float LJSensitivity { get; private set; }
 	public static float RJSensitivity { get; private set; }
+	public static bool inverseMouseWheel { get; private set; }
 
 	public static void SetIsMobile(bool value)
 	{
@@ -116,5 +128,10 @@ public static class Settings
 	public static void SetRJSensitivity(float value)
 	{
 		RJSensitivity = value;
+	}
+
+	public static void SetInverseMouseWheel(bool value)
+	{
+		inverseMouseWheel = value;
 	}
 }

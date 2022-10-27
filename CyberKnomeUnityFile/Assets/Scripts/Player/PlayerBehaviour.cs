@@ -25,6 +25,9 @@ public class PlayerBehaviour : GameEntity
     float weaponRotation;
 
     //TODO: weapon inventory
+    List<int> weaponInventory = new List<int>();
+    int currentWeaponIndex;
+    int maxWeaponCount = 4;
 
 	#endregion
 
@@ -53,7 +56,7 @@ public class PlayerBehaviour : GameEntity
 
     public void ReceiveInput()
 	{
-        walkDir = Settings.isMobile ? PlayerInput.MovementInput : new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        walkDir = Settings.isMobile ? MobilePlayerInput.MovementInput : new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         walkDir.Normalize();
 
         if (!Settings.isMobile)
@@ -65,12 +68,45 @@ public class PlayerBehaviour : GameEntity
         }
         else
         {
-            targetDir = PlayerInput.AimInput != Vector2.zero ? PlayerInput.AimInput : PlayerInput.MovementInput == Vector2.zero ? targetDir : PlayerInput.MovementInput;
+            targetDir = MobilePlayerInput.AimInput != Vector2.zero ? MobilePlayerInput.AimInput : MobilePlayerInput.MovementInput == Vector2.zero ? targetDir : MobilePlayerInput.MovementInput;
         }
 
-        if (((!Settings.isMobile && Input.GetMouseButton(0)) || (Settings.isMobile && PlayerInput.AimInput != Vector2.zero))&& myWeapon) //TODO: implement PlayerInput again for mobile
+        if (((!Settings.isMobile && Input.GetMouseButton(0)) || (Settings.isMobile && MobilePlayerInput.AimInput != Vector2.zero))&& myWeapon) //TODO: implement PlayerInput again for mobile
 		{
             myWeapon.Use();
+        }
+
+        if (Input.GetAxisRaw("Mouse ScrollWheel") > 0f) //mouse wheel forward
+        {
+
+            SwapWeaponWithDirection(true);
+
+        }
+        else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0f) //backward
+        {
+            SwapWeaponWithDirection(false);
+		}
+
+        if (Input.GetKeyDown(KeyCode.Alpha1) || (Settings.isMobile && MobilePlayerInput.WeaponIventorySelected == 0)) //TODO: mobile
+		{
+            SwapWeapon(0);
+            MobilePlayerInput.SetWeaponIventorySelected(-1);
+
+        } 
+        else if (Input.GetKeyDown(KeyCode.Alpha2) || (Settings.isMobile && MobilePlayerInput.WeaponIventorySelected == 1))
+        {
+            SwapWeapon(1);
+            MobilePlayerInput.SetWeaponIventorySelected(-1);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3) || (Settings.isMobile && MobilePlayerInput.WeaponIventorySelected == 2))
+        {
+            SwapWeapon(2);
+            MobilePlayerInput.SetWeaponIventorySelected(-1);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4) || (Settings.isMobile && MobilePlayerInput.WeaponIventorySelected == 3))
+        {
+            SwapWeapon(3);
+            MobilePlayerInput.SetWeaponIventorySelected(-1);
         }
     }
 
@@ -159,9 +195,9 @@ public class PlayerBehaviour : GameEntity
                 UICommunicator.Instance.InteractNearby(data);
             }
 
-            if (selectedInteractable && (Input.GetKeyDown(KeyCode.Q) || PlayerInput.InteractInput)) //TODO: mobile input and key bind 
+            if (selectedInteractable && (Input.GetKeyDown(KeyCode.Q) || MobilePlayerInput.InteractInput)) //TODO: mobile input and key bind 
             {
-                PlayerInput.SetInteractInput(false);
+                MobilePlayerInput.SetInteractInput(false);
                 SetWeapon(selectedInteractable.Interact()); //TODO interact for other type
             }
 
@@ -171,16 +207,107 @@ public class PlayerBehaviour : GameEntity
         }
     }
 
-    public void SetWeapon(GameObject weaponPrefab)
-	{
-        if (myWeapon)
-		{
-            myWeapon.Drop();
-		}
+	#endregion
 
-        GameObject instantiatedWeapon = Instantiate(weaponPrefab, weaponPos);
-        myWeapon = instantiatedWeapon.GetComponent<Weapon>();
-		
+	#region Weapon Inventory
+
+	public void SetWeapon(int weaponItemCode)
+	{
+        print(weaponInventory.Count + " " + maxWeaponCount);
+        if (weaponInventory.Count >= maxWeaponCount) //if playerinventoryCount is greater or equals to maxWeaponCount
+        {
+            //exchange when max
+
+            weaponInventory[currentWeaponIndex] = weaponItemCode; //update weaponInventory's currentWeaponIndex with new weaponItemCode
+
+            if (myWeapon)
+            {
+                myWeapon.Drop(); //drop the old weapon
+            }
+
+            GameObject instantiatedWeapon = Instantiate(ItemList.Instance.UltimateWeaponList[weaponItemCode].weaponPrefab, weaponPos);
+            myWeapon = instantiatedWeapon.GetComponent<Weapon>();
+        }
+        else
+        {
+            //add new when not max
+
+            //destroy but not drop the current my weapon if you have one
+            if (myWeapon)
+            {
+                Destroy(myWeapon.gameObject);
+            }
+
+            GameObject instantiatedWeapon = Instantiate(ItemList.Instance.UltimateWeaponList[weaponItemCode].weaponPrefab, weaponPos);
+            myWeapon = instantiatedWeapon.GetComponent<Weapon>();
+
+            weaponInventory.Add(weaponItemCode);
+            currentWeaponIndex = weaponInventory.Count - 1;
+        }
+        UICommunicator.Instance.WeaponInventoryUpdate(weaponInventory, currentWeaponIndex);
+    }
+
+    public void SwapWeapon(int index)
+	{
+        if (weaponInventory.Count > index)
+		{
+            print(index);
+
+            if (myWeapon)
+            {
+                Destroy(myWeapon.gameObject);
+            }
+
+            currentWeaponIndex = index;
+
+            GameObject instantiatedWeapon = Instantiate(ItemList.Instance.UltimateWeaponList[weaponInventory[index]].weaponPrefab, weaponPos);
+            myWeapon = instantiatedWeapon.GetComponent<Weapon>();
+
+            UICommunicator.Instance.WeaponInventoryUpdate(weaponInventory, currentWeaponIndex);
+        } 
+    }
+
+    public void SwapWeaponWithDirection(bool next)
+	{
+        if (!Settings.inverseMouseWheel)
+		{
+            if (next)
+		    {
+                if (currentWeaponIndex < weaponInventory.Count - 1)
+                {
+                    currentWeaponIndex++;
+                }
+                else currentWeaponIndex = 0;
+            } else
+		    {
+                if (1 <= currentWeaponIndex)
+                {
+                    currentWeaponIndex--;
+                }
+                else currentWeaponIndex = weaponInventory.Count != 0 ? weaponInventory.Count - 1 : 0;
+            }
+		} else
+		{
+            if (!next)
+            {
+                if (currentWeaponIndex < weaponInventory.Count - 1)
+                {
+                    currentWeaponIndex++;
+                }
+                else currentWeaponIndex = 0;
+            }
+            else
+            {
+                if (1 <= currentWeaponIndex)
+                {
+                    currentWeaponIndex--;
+                }
+                else currentWeaponIndex = weaponInventory.Count != 0 ? weaponInventory.Count - 1 : 0;
+            }
+        }
+
+        SwapWeapon(currentWeaponIndex);
+        //print(currentWeaponIndex + " " + (weaponInventory.Count - 1));
     }
 
 	#endregion

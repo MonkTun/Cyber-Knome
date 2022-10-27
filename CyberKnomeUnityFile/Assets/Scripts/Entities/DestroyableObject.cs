@@ -11,7 +11,7 @@ public class DestroyableObject : GameEntity
 	{
 		if (isDead) return;
 
-		print("health:" + health);
+		//print("health:" + health);
 		StartCoroutine(OnDamageGFX());
 
 		base.OnDamage(damage);
