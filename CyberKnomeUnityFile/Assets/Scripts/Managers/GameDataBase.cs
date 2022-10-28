@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemList : MonoBehaviour
+public class GameDataBase : MonoBehaviour
 {
 	[System.Serializable]
 	public class ItemData
@@ -16,6 +16,7 @@ public class ItemList : MonoBehaviour
 
 	[SerializeField] ItemData[] ultimateWeaponList;
 	[SerializeField] ItemData[] ultimateItemList;
+	[SerializeField] GameObject[] ultimatePlayerList;
 
 	public ItemData[] UltimateWeaponList 
 	{ 
@@ -33,7 +34,15 @@ public class ItemList : MonoBehaviour
 		}
 	}
 
-	public static ItemList Instance;
+	public GameObject[] UltimatePlayerList
+	{
+		get
+		{
+			return ultimatePlayerList;
+		}
+	}
+
+	public static GameDataBase Instance;
 
 	private void Awake()
 	{

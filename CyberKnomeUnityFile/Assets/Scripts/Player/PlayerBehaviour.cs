@@ -28,17 +28,42 @@ public class PlayerBehaviour : GameEntity
     List<int> weaponInventory = new List<int>();
     int currentWeaponIndex;
     int maxWeaponCount = 4;
+    public int GetHealth
+    {
+        get
+        {
+            return health;
+        }
+    }
+    public List<int> GetWeaponInventory
+    {
+        get
+        {
+            return weaponInventory;
+        }
+    }
 
-	#endregion
 
-	#region start
+    #endregion
 
-	public override void Start()
+    #region start
+
+    public override void Start()
 	{
         base.Start();
 
         //load save file
     }
+
+    public void SetupData(int _health, List<int> _weaponInventory)
+	{
+        health = _health;
+
+        foreach (int i in _weaponInventory)
+		{
+            SetWeapon(i);
+        }
+	}
 
 	#endregion
 
@@ -225,7 +250,7 @@ public class PlayerBehaviour : GameEntity
                 myWeapon.Drop(); //drop the old weapon
             }
 
-            GameObject instantiatedWeapon = Instantiate(ItemList.Instance.UltimateWeaponList[weaponItemCode].weaponPrefab, weaponPos);
+            GameObject instantiatedWeapon = Instantiate(GameDataBase.Instance.UltimateWeaponList[weaponItemCode].weaponPrefab, weaponPos);
             myWeapon = instantiatedWeapon.GetComponent<Weapon>();
         }
         else
@@ -238,7 +263,7 @@ public class PlayerBehaviour : GameEntity
                 Destroy(myWeapon.gameObject);
             }
 
-            GameObject instantiatedWeapon = Instantiate(ItemList.Instance.UltimateWeaponList[weaponItemCode].weaponPrefab, weaponPos);
+            GameObject instantiatedWeapon = Instantiate(GameDataBase.Instance.UltimateWeaponList[weaponItemCode].weaponPrefab, weaponPos);
             myWeapon = instantiatedWeapon.GetComponent<Weapon>();
 
             weaponInventory.Add(weaponItemCode);
@@ -260,7 +285,7 @@ public class PlayerBehaviour : GameEntity
 
             currentWeaponIndex = index;
 
-            GameObject instantiatedWeapon = Instantiate(ItemList.Instance.UltimateWeaponList[weaponInventory[index]].weaponPrefab, weaponPos);
+            GameObject instantiatedWeapon = Instantiate(GameDataBase.Instance.UltimateWeaponList[weaponInventory[index]].weaponPrefab, weaponPos);
             myWeapon = instantiatedWeapon.GetComponent<Weapon>();
 
             UICommunicator.Instance.WeaponInventoryUpdate(weaponInventory, currentWeaponIndex);

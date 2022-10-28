@@ -120,7 +120,7 @@ public class UICommunicator : MonoBehaviour
 
 			if (i < _weaponInventory.Count)
 			{
-				hotbarButtons[i].img.sprite = ItemList.Instance.UltimateWeaponList[_weaponInventory[i]].sprite;
+				hotbarButtons[i].img.sprite = GameDataBase.Instance.UltimateWeaponList[_weaponInventory[i]].sprite;
 				hotbarButtons[i].img.color = Color.white;
 
 			} else
