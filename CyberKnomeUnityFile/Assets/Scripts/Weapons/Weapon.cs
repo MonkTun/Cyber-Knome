@@ -25,6 +25,7 @@ public class Weapon : MonoBehaviour
 		if (lastFireTime + cooltime < Time.time)
 		{
 			AN.SetTrigger("Use");
+			FindObjectOfType<AudioManager>().Play("KnifeSwing");
 			lastFireTime = Time.time;
 			
 			switch (weaponType)
