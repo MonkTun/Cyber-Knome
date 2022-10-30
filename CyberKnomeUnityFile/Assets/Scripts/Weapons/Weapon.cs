@@ -8,6 +8,9 @@ public class Weapon : MonoBehaviour
 	[SerializeField] Animator AN;
 	float lastFireTime;
 
+	[SerializeField] AudioSource audioSource;
+	[SerializeField] AudioClip weaponUseClip; 
+
 	[Header("Weapon Trait")]
 	public WeaponType weaponType;
 	[SerializeField] float cooltime;
@@ -22,10 +25,11 @@ public class Weapon : MonoBehaviour
 
     public bool Use()
 	{
+		
+		audioSource.PlayOneShot(weaponUseClip);
 		if (lastFireTime + cooltime < Time.time)
 		{
 			AN.SetTrigger("Use");
-			FindObjectOfType<AudioManager>().Play("KnifeSwing");
 			lastFireTime = Time.time;
 			
 			switch (weaponType)
@@ -56,7 +60,7 @@ public class Weapon : MonoBehaviour
 		yield return new WaitForSeconds(0.15f);
 
 		Collider2D[] colliders = Physics2D.OverlapBoxAll(transform.position + transform.right, hitboxSize, transform.rotation.z, 1 << LayerMask.NameToLayer("Enemy"));
-
+		
 		if (colliders.Length > 0)
 		{
 			foreach (Collider2D obj in colliders)
