@@ -7,18 +7,21 @@ using UnityEngine.SceneManagement;
 public class EnvironmentManager : MonoBehaviour
 {
     [SerializeField] CinemachineVirtualCamera cameraFollow;
+    [SerializeField] Transform spawnPoint;
 
     void Start() //TODO: load save data
     {
-        ProgressData data = ProgressSave.LoadProgress();
+        ProgressData data = SavesManager.LoadProgress();
 
-        GameObject player = Instantiate(GameDataBase.Instance.UltimatePlayerList[data.character], data.position, Quaternion.identity);
+        GameObject player = Instantiate(GameDataBase.Instance.UltimatePlayerList[data.character], data.position == Vector2.zero ? spawnPoint.position : data.position, Quaternion.identity);
         cameraFollow.Follow = player.transform;
 
         if (player.TryGetComponent(out PlayerBehaviour playerBehaviour))
 		{
-            playerBehaviour.SetupData(data.health, data.weaponInventory);
+            playerBehaviour.SetupData(data.health, data.weaponInventory, data.currentWeaponIndex);
         }
+
+        //TODO: play you arrived to .... animation
     }
 
 	private void Update()
@@ -27,9 +30,9 @@ public class EnvironmentManager : MonoBehaviour
 		{
             PlayerBehaviour playerBehaviour = FindObjectOfType<PlayerBehaviour>();
 
-            print("SavesData!");
-            ProgressSave.SaveProgress(new ProgressData(0, playerBehaviour.GetHealth, 1, playerBehaviour.transform.position,
-                playerBehaviour.GetWeaponInventory)); //TODO: handle player character code and also Scene index later
+            print("EnvironmentManager - SavesData!");
+            SavesManager.SaveProgress(new ProgressData(playerBehaviour.characterCode, playerBehaviour.GetHealth, SceneManager.GetActiveScene().buildIndex, playerBehaviour.transform.position,
+                playerBehaviour.GetWeaponInventory, playerBehaviour.currentWeaponIndex)); //TODO: handle player character code and also Scene index later
 
         }
 	}

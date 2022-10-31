@@ -49,7 +49,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactWeaponObj: {fileID: 8744286151760117803, guid: 5308904384cc8eb49a3366254ea17005, type: 3}
   AN: {fileID: 7461956083816031851}
-  weaponItemCode: 1
   weaponType: 2
   cooltime: 0.5
   damage: 10
@@ -57,7 +56,8 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   firePos: {fileID: 0}
   speed: 0
-  duration: 0
+  distance: 0
+  brawlAimingMax: 1
 --- !u!95 &7461956083816031851
 Animator:
   serializedVersion: 4

@@ -55,7 +55,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 3b8d425b6ca4d8e4781a22776d12df74, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -102,7 +102,7 @@ MonoBehaviour:
   interactData:
     interactType: 0
     interactable: {fileID: 8744286151760117801}
-  returnObject: {fileID: 3252904166320612530, guid: 6638446fd70dc864eb2ca7ebb64243eb, type: 3}
+  returnItemCode: 0
   destroyAfterInteract: 1
 --- !u!61 &8744286151760117796
 BoxCollider2D:
@@ -120,7 +120,7 @@ BoxCollider2D:
   m_Offset: {x: -0.009682655, y: 0.053122282}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5013144, y: 0.092534244}
+    pivot: {x: 0.5, y: 0.1}
     oldSize: {x: 2, y: 2}
     newSize: {x: 2, y: 2}
     adaptiveTilingThreshold: 0.5

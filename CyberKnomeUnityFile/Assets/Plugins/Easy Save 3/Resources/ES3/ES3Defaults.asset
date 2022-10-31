@@ -32,8 +32,10 @@ MonoBehaviour:
     - Assembly-CSharp-firstpass
     - Assembly-CSharp
     - Cinemachine
+    - NavMeshComponents
     - PsdPlugin
     - PPv2URPConverters
+    - NavMeshComponentsEditor
     showAdvancedSettings: 0
   addMgrToSceneAutomatically: 0
   autoUpdateReferences: 1

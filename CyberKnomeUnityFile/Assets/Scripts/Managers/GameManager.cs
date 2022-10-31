@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour
 
 	public void StartGame()
 	{
-		levelManager.LoadScene(1); //TODO: change the index accordingly
+		levelManager.LoadScene(SavesManager.LoadProgress().scene == -1 ? 1 : SavesManager.LoadProgress().scene); //TODO: change the index accordingly
 		PanelManage(playPanel);
 		gameState = State.playing;
 	}
@@ -82,6 +82,21 @@ public class GameManager : MonoBehaviour
 		levelManager.LoadScene(0);
 		gameState = State.lobby;
 		PanelManage(null);
+	}
+
+	#endregion
+
+	#region game
+
+	public void TravelScene(int index)
+	{
+		PlayerBehaviour playerBehaviour = FindObjectOfType<PlayerBehaviour>();
+
+		print("SavesData!");
+		SavesManager.SaveProgress(new ProgressData(playerBehaviour.characterCode, playerBehaviour.GetHealth, index, Vector2.zero,
+			playerBehaviour.GetWeaponInventory, playerBehaviour.currentWeaponIndex));
+
+		levelManager.LoadScene(index);
 	}
 
 	#endregion

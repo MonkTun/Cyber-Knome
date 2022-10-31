@@ -10,7 +10,7 @@ public class UICommunicator : MonoBehaviour
 	[SerializeField] GameObject mobilePanel, PCPanel;
 	[Header("Interact")]
 	[SerializeField] UIAccessor[] interactUI;
-	[SerializeField] Sprite talkSprite, grabSprite, openSprite;
+	[SerializeField] Sprite[] interactSprites;
 	[Header("WeaponInventory")]
 	[SerializeField] UIAccessor[] hotbarButtons;
 
@@ -57,25 +57,32 @@ public class UICommunicator : MonoBehaviour
 
 		switch (data.interactType)
 		{
+			case InteractableData.InteractType.grab:
+				foreach (UIAccessor access in interactUI)
+				{
+					if (access.txt) access.txt.text = "Q - grab";
+					if (access.img) access.img.sprite = interactSprites[0];
+				}
+				break;
 			case InteractableData.InteractType.talk:
 				foreach (UIAccessor access in interactUI)
 				{
 					if (access.txt) access.txt.text = "Q - talk";
-					if (access.img) access.img.sprite = talkSprite;
+					if (access.img) access.img.sprite = interactSprites[1];
 				}
 				break;
 			case InteractableData.InteractType.open:
 				foreach (UIAccessor access in interactUI)
 				{
 					if (access.txt) access.txt.text = "Q - open";
-					if (access.img) access.img.sprite = openSprite;
+					if (access.img) access.img.sprite = interactSprites[2];
 				}
 				break;
-			case InteractableData.InteractType.grab:
+			case InteractableData.InteractType.portal:
 				foreach (UIAccessor access in interactUI)
 				{
-					if (access.txt) access.txt.text = "Q - grab";
-					if (access.img) access.img.sprite = grabSprite;
+					if (access.txt) access.txt.text = "Q - portal";
+					if (access.img) access.img.sprite = interactSprites[3];
 				}
 				break;
 		}

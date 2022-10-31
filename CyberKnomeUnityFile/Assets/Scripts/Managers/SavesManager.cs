@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class ProgressSave
+public static class SavesManager
 {
     public static void SaveProgress(ProgressData data)
     {
@@ -11,6 +11,7 @@ public static class ProgressSave
         ES3.Save("save_scene", data.scene);
         ES3.Save("save_position", data.position);
         ES3.Save("save_weaponInventory", data.weaponInventory);
+        ES3.Save("save_currentWeaponIndex", data.currentWeaponIndex);
     }
 
     public static ProgressData LoadProgress()
@@ -26,7 +27,10 @@ public static class ProgressSave
         List<int> defaultWeaponInventory = new List<int>();
         List<int> _weaponInventory = ES3.Load("save_weaponInventory", defaultWeaponInventory);
 
-        return (new ProgressData(_character, _health, _scene, _position, _weaponInventory));
+        int _currentWeaponIndex = ES3.Load("save_currentWeaponIndex", 0);
+
+
+        return (new ProgressData(_character, _health, _scene, _position, _weaponInventory, _currentWeaponIndex));
     }
 }
 
@@ -37,13 +41,15 @@ public class ProgressData
     public int scene;
     public Vector2 position;
     public List<int> weaponInventory;
+    public int currentWeaponIndex;
 
-    public ProgressData (int _character, int _health, int _scene, Vector2 _position, List<int> _weaponInventory)
+    public ProgressData(int _character, int _health, int _scene, Vector2 _position, List<int> _weaponInventory, int _currentWeaponIndex)
 	{
-        character = _character;
-        health = _health;
-        scene = _scene;
-        position = _position;
-        weaponInventory = _weaponInventory;
-    }
+		character = _character;
+		health = _health;
+		scene = _scene;
+		position = _position;
+		weaponInventory = _weaponInventory;
+		currentWeaponIndex = _currentWeaponIndex;
+	}
 }

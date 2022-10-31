@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Interactable : MonoBehaviour
 {
+	[Header("Interactable")]
 	[SerializeField] InteractableData interactData;
 	[SerializeField] int returnItemCode;
 	[SerializeField] bool destroyAfterInteract;
@@ -13,7 +14,7 @@ public class Interactable : MonoBehaviour
 		return interactData;
 	}
 
-    public int Interact()
+    public virtual int Interact()
 	{
 		if (destroyAfterInteract) Destroy(gameObject);
 		return returnItemCode;
@@ -28,6 +29,7 @@ public class InteractableData
 		grab,
 		talk,
 		open,
+		portal,
 	}
 
 	public InteractType interactType;

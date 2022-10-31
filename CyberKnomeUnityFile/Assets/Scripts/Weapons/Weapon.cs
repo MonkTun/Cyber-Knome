@@ -18,14 +18,16 @@ public class Weapon : MonoBehaviour
 	[SerializeField] GameObject projectilePrefab;
 	[SerializeField] Transform firePos;
 	[SerializeField] float speed;
-	[SerializeField] float duration;
+	[SerializeField] public float distance;
+	[Header("BrawlAiming")]
+	[SerializeField] public int brawlAimingMax = 1;
 
     public bool Use()
 	{
 		if (lastFireTime + cooltime < Time.time)
 		{
 			AN.SetTrigger("Use");
-			FindObjectOfType<AudioManager>().Play("KnifeSwing");
+			//FindObjectOfType<AudioManager>().Play("KnifeSwing");
 			lastFireTime = Time.time;
 			
 			switch (weaponType)
@@ -35,7 +37,7 @@ public class Weapon : MonoBehaviour
 					break;
 
 				case WeaponType.gun:
-					Instantiate(projectilePrefab, firePos.position, transform.rotation).GetComponent<Projectile>().Setup(speed, damage, duration);
+					Instantiate(projectilePrefab, firePos.position, transform.rotation).GetComponent<Projectile>().Setup(speed, damage, distance);
 					break;
 				case WeaponType.sword:
 					StartCoroutine(UseRoutineSword());

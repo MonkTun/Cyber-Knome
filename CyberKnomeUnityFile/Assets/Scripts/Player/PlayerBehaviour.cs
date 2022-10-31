@@ -4,15 +4,21 @@ using UnityEngine;
 
 public class PlayerBehaviour : GameEntity
 {
-	#region field_ref
+    #region field_ref
 
-	[SerializeField] SpriteRenderer SR;
+    //[SerializeField] SpriteRenderer SR;
     [SerializeField] Animator AN;
     [SerializeField] Rigidbody2D RB;
 
     [SerializeField] float speed = 2;
+    [SerializeField] float autoAimDistance = 4;
 
     [SerializeField] Transform weaponPos;
+    [SerializeField] AimIndicator aimIndicator;
+
+    [Header("Saving System Related")]
+	[HideInInspector]
+    public int characterCode;
 
     #endregion
 
@@ -24,9 +30,13 @@ public class PlayerBehaviour : GameEntity
     Weapon myWeapon;
     float weaponRotation;
 
-    //TODO: weapon inventory
+    bool mobile_isBrawlAiming;
+    bool mobile_isBrawlShooting;
+    int mobile_tempBrawlCount;
+    float mobile_aimTime;
+
     List<int> weaponInventory = new List<int>();
-    int currentWeaponIndex;
+    public int currentWeaponIndex;
     int maxWeaponCount = 4;
     public int GetHealth
     {
@@ -43,7 +53,6 @@ public class PlayerBehaviour : GameEntity
         }
     }
 
-
     #endregion
 
     #region start
@@ -52,10 +61,10 @@ public class PlayerBehaviour : GameEntity
 	{
         base.Start();
 
-        //load save file
+        //TODO:load save file... replace setupData?
     }
 
-    public void SetupData(int _health, List<int> _weaponInventory)
+    public void SetupData(int _health, List<int> _weaponInventory, int _currentWeaponIndex)
 	{
         health = _health;
 
@@ -63,6 +72,8 @@ public class PlayerBehaviour : GameEntity
 		{
             SetWeapon(i);
         }
+
+        SwapWeapon(_currentWeaponIndex);
 	}
 
 	#endregion
@@ -71,7 +82,12 @@ public class PlayerBehaviour : GameEntity
 
 	void Update()
     {
-        if (GameManager.Instance.gameState == GameManager.State.paused) return;
+        if (GameManager.Instance.gameState == GameManager.State.paused) 
+        {
+            RB.velocity = Vector2.zero;
+            return;
+        } 
+        
 
         ReceiveInput();
         Movement();
@@ -84,30 +100,118 @@ public class PlayerBehaviour : GameEntity
         walkDir = Settings.isMobile ? MobilePlayerInput.MovementInput : new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         walkDir.Normalize();
 
-        if (!Settings.isMobile)
-        {
-            Vector2 aimDirection = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
-            aimDirection.Normalize();
-
-            targetDir = aimDirection;
-        }
-        else
-        {
-            targetDir = MobilePlayerInput.AimInput != Vector2.zero ? MobilePlayerInput.AimInput : MobilePlayerInput.MovementInput == Vector2.zero ? targetDir : MobilePlayerInput.MovementInput;
-        }
-
-        if (((!Settings.isMobile && Input.GetMouseButton(0)) || (Settings.isMobile && MobilePlayerInput.AimInput != Vector2.zero))&& myWeapon) //TODO: implement PlayerInput again for mobile
+        if (myWeapon)
 		{
-            myWeapon.Use();
+            if (!Settings.isMobile)
+            {
+
+                Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Vector2 aimDirection = mousePos - (Vector2)weaponPos.position;
+                aimDirection.Normalize();
+
+                aimIndicator.SetAimIndicator(mousePos);
+
+                targetDir = aimDirection;
+
+                if (Input.GetMouseButton(0))
+                {
+                    myWeapon.Use();
+                }
+            }
+            else
+            {
+                switch (myWeapon.weaponType)
+				{
+                    case WeaponType.gun:
+
+                        if (mobile_isBrawlShooting)
+                        {
+                            if (mobile_tempBrawlCount < myWeapon.brawlAimingMax)
+                            {
+                                if (myWeapon.Use())
+                                    mobile_tempBrawlCount++;
+                            }
+                            else
+                            {
+                                mobile_tempBrawlCount = 0;
+                                mobile_isBrawlShooting = false;
+                            }
+                            aimIndicator.SetAimIndicator(weaponPos.position, targetDir, myWeapon.distance, true);
+                            mobile_aimTime = 0;
+                        }
+                        else
+                        {
+                            if (MobilePlayerInput.AimInput != Vector2.zero)
+                            {
+                                mobile_aimTime += Time.deltaTime;
+
+                                if (mobile_aimTime > 0.1f)
+                                {
+                                    targetDir = MobilePlayerInput.AimInput;
+                                    aimIndicator.SetAimIndicator(weaponPos.position, targetDir, myWeapon.distance, false);
+                                }
+                                else
+								{
+                                    Vector2 enemyDir = FindEnemyNearby(20);
+                                    if (enemyDir != Vector2.zero)
+                                        targetDir = enemyDir;
+
+                                    
+                                    aimIndicator.SetAimIndicator(weaponPos.position, targetDir, myWeapon.distance, true);
+                                }
+
+                                mobile_isBrawlAiming = true;
+                            }
+                            else if (mobile_isBrawlAiming)
+                            {
+                                mobile_isBrawlAiming = false;
+                                mobile_isBrawlShooting = true;
+
+                                aimIndicator.SetAimIndicator(weaponPos.position, targetDir, myWeapon.distance, true);
+                            } 
+                            else
+							{
+                                targetDir = MobilePlayerInput.MovementInput == Vector2.zero ? targetDir : MobilePlayerInput.MovementInput;
+                            }
+                        }
+
+                        break;
+                    case WeaponType.staff:
+
+                        if (MobilePlayerInput.MovementInput != Vector2.zero)
+                            targetDir = MobilePlayerInput.MovementInput;
+
+                        if (MobilePlayerInput.AimInput != Vector2.zero)
+                        {
+                            myWeapon.Use();
+                            mobile_isBrawlAiming = false;
+                        }
+
+                        break;
+                    default:
+
+                        Vector2 enemyDir2 = FindEnemyNearby(5);
+
+                        targetDir = enemyDir2 == Vector2.zero ? MobilePlayerInput.MovementInput : enemyDir2;
+
+                        if (MobilePlayerInput.AimInput != Vector2.zero)
+                        {
+                            myWeapon.Use();
+                            mobile_isBrawlAiming = false;
+                        }
+
+                        break;
+                }
+            }
         }
 
-        if (Input.GetAxisRaw("Mouse ScrollWheel") > 0f) //mouse wheel forward
+        if (!Settings.isMobile && Input.GetAxisRaw("Mouse ScrollWheel") > 0f) //mouse wheel forward
         {
 
             SwapWeaponWithDirection(true);
 
         }
-        else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0f) //backward
+        else if (!Settings.isMobile && Input.GetAxisRaw("Mouse ScrollWheel") < 0f) //backward
         {
             SwapWeaponWithDirection(false);
 		}
@@ -145,7 +249,6 @@ public class PlayerBehaviour : GameEntity
         RB.velocity = walkDir * speed;
     }
 
-
     public void UpdateWeaponOrientation() //TODO: inputManager
     {
         if (myWeapon == null) return;
@@ -156,19 +259,19 @@ public class PlayerBehaviour : GameEntity
                 weaponPos.localScale = new Vector3(1, 1, 1);
                 weaponPos.transform.rotation = Quaternion.identity;
 
-                if (targetDir.x > 0)
+                if (targetDir.x > 0.1f)
 				{
                     weaponPos.localPosition = new Vector2(0.5f, 0.5f);
                     weaponPos.localScale = new Vector2(1f, 1f);
 
-                } else
+                } else if (targetDir.x < -0.1f)
 				{
                     weaponPos.localPosition = new Vector2(-0.5f, 0.5f);
                     weaponPos.localScale = new Vector2(-1f, 1f);
                 }
 
                 break;
-            case WeaponType.gun: //TODO shrink these codes
+            default: 
                 weaponPos.localPosition = new Vector2(0, 0.5f);
                 weaponPos.localScale = new Vector2(1f, 1f);
 
@@ -184,24 +287,32 @@ public class PlayerBehaviour : GameEntity
                     weaponPos.localScale = new Vector3(1, 1, 1);
                 }
                 break;
-            case WeaponType.sword:
-                weaponPos.localPosition = new Vector2(0, 0.5f);
-                weaponPos.localScale = new Vector2(1f, 1f);
-
-                weaponRotation = Mathf.Atan2(targetDir.y, targetDir.x) * Mathf.Rad2Deg;
-
-                weaponPos.transform.rotation = Quaternion.Euler(0f, 0f, weaponRotation);
-                if (weaponRotation < -90 || weaponRotation > 90)
-				{
-                    weaponPos.localScale = new Vector3(1, -1, 1);
-                } else
-				{
-                    weaponPos.localScale = new Vector3(1, 1, 1);
-                }
-
-                break;
         }
 	}
+
+    public Vector2 FindEnemyNearby(float distance)
+    {
+        Collider2D[] nearestObjList = Physics2D.OverlapCircleAll(transform.position, distance, 1 << LayerMask.NameToLayer("Enemy"));
+
+        if (nearestObjList.Length > 0)
+		{
+            Vector2 temp = nearestObjList[0].gameObject.transform.position;
+
+            for (int i = 0; i < nearestObjList.Length; i++)
+            {
+                if (Vector2.Distance(transform.position, nearestObjList[i].gameObject.transform.position) < Vector2.Distance(transform.position, temp))
+                {
+                    temp = nearestObjList[i].gameObject.transform.position;
+                }
+            }
+
+            return (temp - (Vector2)weaponPos.position).normalized;
+        } 
+        else
+		{
+            return Vector2.zero;
+		}
+    }
 
     #endregion
 
@@ -209,7 +320,7 @@ public class PlayerBehaviour : GameEntity
 
     public void Interact()
     {
-        Collider2D[] nearestObjList = Physics2D.OverlapCircleAll(transform.position, 2, 1 << LayerMask.NameToLayer("Interactable"));
+        Collider2D[] nearestObjList = Physics2D.OverlapCircleAll(transform.position, 1.5f, 1 << LayerMask.NameToLayer("Interactable"));
 
         if (nearestObjList.Length > 0)
         {
@@ -238,7 +349,9 @@ public class PlayerBehaviour : GameEntity
 
 	public void SetWeapon(int weaponItemCode)
 	{
-        print(weaponInventory.Count + " " + maxWeaponCount);
+        if (weaponItemCode < 0) return;
+
+        //print(weaponInventory.Count + " " + maxWeaponCount);
         if (weaponInventory.Count >= maxWeaponCount) //if playerinventoryCount is greater or equals to maxWeaponCount
         {
             //exchange when max
@@ -289,6 +402,9 @@ public class PlayerBehaviour : GameEntity
             myWeapon = instantiatedWeapon.GetComponent<Weapon>();
 
             UICommunicator.Instance.WeaponInventoryUpdate(weaponInventory, currentWeaponIndex);
+
+            mobile_isBrawlAiming = false;
+            mobile_isBrawlShooting = false;
         } 
     }
 

@@ -5,34 +5,39 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     [SerializeField] SpriteRenderer SR;
-    [SerializeField] ParticleSystem PS;
+    [SerializeField] ParticleSystem impactPS, timeoutPS;
 
     [SerializeField] bool isPlayers;
 
     bool isDestroyed;
-    float initializedTime;
+
     float speed = 5;
     int damage = 10;
-    float duration = 4;
+    float maxDistance = 7;
+    float traveledDistance = 0;
 
-    public void Setup(float _speed, int _damage, float _duration)
+    public void Setup(float _speed, int _damage, float _distance)
     {
-        initializedTime = Time.time;
         speed = _speed;
         damage = _damage;
-        duration = _duration;
+        maxDistance = _distance;
     }
 
     void FixedUpdate()
     {
-        if (isDestroyed || initializedTime == 0) return;
+        if (isDestroyed || maxDistance == 0) return;
 
-        if (initializedTime + duration < Time.time)
+        if (traveledDistance > maxDistance)
 		{
-            Destroy(gameObject);
-		}
+            timeoutPS.Play();
+            SR.enabled = false;
+            isDestroyed = true;
+            Destroy(gameObject, 1);
+        }
 
         transform.Translate(Vector2.right * speed * Time.deltaTime);
+
+        traveledDistance += speed * Time.deltaTime;
     }
 
 	private void OnTriggerEnter2D(Collider2D collision)
@@ -47,7 +52,7 @@ public class Projectile : MonoBehaviour
 
         }
 
-        PS.Play();
+        impactPS.Play();
         SR.enabled = false;
         isDestroyed = true;
         Destroy(gameObject, 1);

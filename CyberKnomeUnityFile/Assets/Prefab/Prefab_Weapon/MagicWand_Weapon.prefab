@@ -48,7 +48,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactWeaponObj: {fileID: 8744286151760117803, guid: 7a6530b18456bc946b35ef7fd55c9cec, type: 3}
   AN: {fileID: 7461956083816031851}
-  itemCode: 0
   weaponType: 0
   cooltime: 0.5
   damage: 100
@@ -56,7 +55,8 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   firePos: {fileID: 0}
   speed: 0
-  duration: 0
+  distance: 0
+  brawlAimingMax: 1
 --- !u!95 &7461956083816031851
 Animator:
   serializedVersion: 4
@@ -129,7 +129,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 3b8d425b6ca4d8e4781a22776d12df74, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
